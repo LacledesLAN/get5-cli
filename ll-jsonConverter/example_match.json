@@ -1,0 +1,70 @@
+{
+  "cvars": {
+    "hostname": "Match server #1"
+  },
+  "favored_percentage_team1": 65,
+  "favored_percentage_text": "HLTV Bets",
+  "maplist": [
+    "de_cache",
+    "de_dust2",
+    "de_inferno",
+    "de_mirage",
+    "de_nuke",
+    "de_overpass",
+    "de_train"
+  ],
+  "matchid": "coolvalue",
+  "min_players_to_ready": 1,
+  "min_spectators_to_ready": 0,
+  "num_maps": 3,
+  "players_per_team": 1,
+  "side_type": "standard",
+  "skip_veto": false,
+  "spectators": {
+    "players": {
+      "steam_1": "",
+      "steam_2": ""
+    }
+  },
+  "team1": {
+    "flag": "FR",
+    "logo": "nv",
+    "name": "EnvyUs",
+    "players": {
+      "steam_0:1:52245092": "jcompton",
+      "steam_1:1:": {
+        "": {
+          "": {
+            "": {
+              "": {
+                "": ""
+              }
+            }
+          }
+        }
+      }
+    },
+    "tag": "EnvyUs"
+  },
+  "team2": {
+    "flag": "SE",
+    "logo": "fntc",
+    "name": "Fnatic",
+    "players": {
+      "steam_0:1:52245092": "bigmac",
+      "steam_1:1:": {
+        "": {
+          "": {
+            "": {
+              "": {
+                "": ""
+              }
+            }
+          }
+        }
+      }
+    },
+    "tag": "Fnatic"
+  },
+  "veto_first": "team1"
+}
