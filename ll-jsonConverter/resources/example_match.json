@@ -2,7 +2,7 @@
   "cvars": {
     "hostname": "Match server #1"
   },
-  "favored_percentage_team1": 65,
+  "favored_percentage_team1": "75",
   "favored_percentage_text": "HLTV Bets",
   "maplist": [
     "de_cache",
@@ -13,7 +13,7 @@
     "de_overpass",
     "de_train"
   ],
-  "matchid": "coolvalue",
+  "matchid": "somereallycoolvalue",
   "min_players_to_ready": 1,
   "min_spectators_to_ready": 0,
   "num_maps": 3,
