@@ -1,0 +1,8 @@
+{
+    "recommendations": [
+		"editorconfig.editorconfig",
+        "ms-azuretools.vscode-docker",
+        "ms-vscode.go",
+        "streetsidesoftware.code-spell-checker",
+    ]
+}

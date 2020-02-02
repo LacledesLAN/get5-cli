@@ -1,0 +1,37 @@
+run:
+  timeout: 2m
+  tests: false
+
+linters-settings:
+  goconst:
+    min-len: 3
+    min-occurrences: 3
+  lll:
+    line-length: 150
+    tab-width: 4
+  misspell:
+    locale: US
+  unused:
+    check-exported: false
+
+linters:
+  enable:
+    - dupl
+    - funlen
+    - gochecknoglobals
+    - gochecknoinits
+    - goconst
+    - gocritic
+    - gocyclo
+    - gosec
+    - interfacer
+    - lll
+    - maligned
+    - misspell
+    - prealloc
+    - scopelint
+    - unparam
+    - unconvert
+    - whitespace
+
+  max-same-issues: 0
