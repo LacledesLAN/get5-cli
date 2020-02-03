@@ -4,16 +4,21 @@
     },
     "files.encoding": "utf8",
     "[go]": {
-        "editor.rulers": [140],
+        "editor.rulers": [160],
     },
     "[markdown]": {
         "editor.rulers": [100],
     },
     "cSpell.words": [
         "csgo",
+        "cvar",
+        "cvars",
         "lacledes",
         "lan",
+        "maplist",
+        "matchid",
         "pugsetup",
-        "sourceseer"
+        "sourceseer",
+        "unmarshalling"
     ],
 }

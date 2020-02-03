@@ -1,0 +1,57 @@
+{
+	"matchid": "example_match",
+	"num_maps": 5,
+	"players_per_team": 5,
+	"min_players_to_ready": 1,
+	"min_spectators_to_ready": 0,
+	"skip_veto": true,
+	"veto_first": "team1",
+	"side_type": "always_knife",
+
+	"spectators": {
+		"players": [
+			"STEAM_1:0:3804719",
+			"STEAM_0:1:99301466"
+		]
+	},
+
+	"maplist": [
+		"de_cache",
+		"de_dust2",
+		"de_inferno",
+		"de_mirage",
+		"de_nuke"
+	],
+
+	"team1": {
+		"name": "Average Joe's",
+		"tag": "AverageJoes",
+		"flag": "US",
+		"logo": "aj",
+		"players": {
+			"STEAM_1:1:11111111": "Ava",
+			"STEAM_1:1:22222222": "Oliver",
+			"STEAM_1:1:33333333": "Mia",
+			"STEAM_1:1:44444444": "Mason",
+			"STEAM_1:1:55555555": "Olivia"
+		}
+	},
+
+	"team2": {
+		"name": "Tune Squad",
+		"tag": "TuneSquad",
+		"flag": "GE",
+		"logo": "ts",
+		"players": [
+			"STEAM_1:2:11111111",
+			"STEAM_1:2:22222222",
+			"STEAM_1:2:33333333",
+			"STEAM_1:2:44444444",
+			"STEAM_1:2:55555555"
+		]
+	},
+
+	"cvars": {
+		"hostname": "Match server #1"
+	}
+}
