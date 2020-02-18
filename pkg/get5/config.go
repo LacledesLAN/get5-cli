@@ -9,19 +9,25 @@ import (
 
 // Config represents a get5 configuration
 type Config struct {
-	MatchID              string            `json:"matchid"`
-	NumMaps              uint              `json:"num_maps"`
-	PlayersPerTeam       byte              `json:"players_per_team"`
-	MinPlayersToReady    byte              `json:"min_player_to_ready"`     // MinPlayersToReady is the number of players a team must have ready to begin
-	MinSpectatorsToReady byte              `json:"min_spectators_to_ready"` // MinSpectatorsToReady is the number of spectators that must be ready to begin
-	SkipVeto             bool              `json:"skip_veto"`
-	VetoFirst            string            `json:"vetofirst"`
-	SideType             string            `json:"side_type"`
-	Spectators           Spectators        `json:"spectators"` // Spectators contains players that are allow to spectate
-	MapList              []string          `json:"maplist"`
-	Team1                Team              `json:"team1"` // Team1 starts as Counter-Terrorists (mp_team1)
-	Team2                Team              `json:"team2"` // Team2 starts as Terrorists (mp_team2)
-	Cvars                map[string]string `json:"cvars"` // Cvars that will be executed on each map start or config load.
+	MatchID        string `json:"matchid"`
+	NumMaps        uint   `json:"num_maps"`
+	PlayersPerTeam byte   `json:"players_per_team"`
+	// MinPlayersToReady is the number of players a team must have ready to begin
+	MinPlayersToReady byte `json:"min_player_to_ready"`
+	// MinSpectatorsToReady is the number of spectators that must be ready to begin
+	MinSpectatorsToReady byte   `json:"min_spectators_to_ready"`
+	SkipVeto             bool   `json:"skip_veto"`
+	VetoFirst            string `json:"vetofirst"`
+	SideType             string `json:"side_type"`
+	// Spectators contains players that are allow to spectate
+	Spectators Spectators `json:"spectators"`
+	MapList    []string   `json:"maplist"`
+	// Team1 starts as Counter-Terrorists (mp_team1)
+	Team1 Team `json:"team1"`
+	// Team2 starts as Terrorists (mp_team2)
+	Team2 Team `json:"team2"`
+	// Cvars that will be executed on each map start or config load.
+	Cvars map[string]string `json:"cvars"`
 }
 
 // Spectators are players who are allowed to spectate the server

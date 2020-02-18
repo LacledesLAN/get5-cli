@@ -3,11 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/LacledesLAN/get5-cli/pkg/get5"
+	"github.com/jessevdk/go-flags"
 )
 
 func prettyPrint(i interface{}) string {
@@ -15,73 +16,48 @@ func prettyPrint(i interface{}) string {
 	return string(s)
 }
 
+var opts struct {
+	CfgFile           string   `long:"cfg" description:"full path the get5-cli configuration file"`
+	MatchID           string   `long:"id" description:"A unique ID to identify the get5 match" required:"true"`
+	Maplist           []string `long:"map" description:"list of maps to use for the get5 match; must be an odd number" required:"true"`
+	MinPlayersToReady byte     `long:"playerstoready" description:"Minimum players a team needs to be able to ready up"`
+}
+
 func main() {
-	jsonBytes, err := ioutil.ReadFile("./testdata/example.json")
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Print("\n\n")
-
-	r := get5.Config{}
-	if err = json.Unmarshal(jsonBytes, &r); err != nil {
-
-		fmt.Printf("couldn't unmarshal: %q", err.Error())
-
+	if _, err := flags.Parse(&opts); err != nil {
+		fmt.Println("Couldn't parse arguments from command line")
 		os.Exit(1)
 	}
 
-	fmt.Printf("%+v\n\n\n", prettyPrint(r))
-	//fmt.Printf("%+v\n\n\n", r)
-}
+	if len(strings.TrimSpace(opts.CfgFile)) == 0 {
+		path, err := os.Getwd()
 
-// conf, err := config.GetConfig("cmd/svr/config.json")
-// if err != nil {
-// 	log.Fatalln("Error getting configuration, shutting down...", err)
-// }
+		if err != nil {
+			fmt.Println("Couldn't determine current working directory")
+			os.Exit(1)
+		}
 
-// log.Println("listening at", conf.Port)
+		opts.CfgFile = filepath.Join(path, "get5-cli.json")
+	}
 
-// err = viperConfig.InitViper(conf)
-// if err != nil {
-// 	log.Fatalln("Viper Error: ", err)
-// }
+	cfg := &Config{}
+	if err := LoadConfig(opts.CfgFile, cfg); err != nil {
+		fmt.Printf("Error loading get5-cli configuration file %q: %s\n", opts.CfgFile, err)
+		os.Exit(1)
+	}
 
-// args := os.Args[1:] //1: gets all command line args, normal indexing works for single args
+	if len(opts.Maplist)%2 == 0 {
+		fmt.Println("Must provide an odd number of maps")
+		os.Exit(1)
+	}
 
-// for index := 0; index < len(args); index++ {
-// 	println("Index ", index, " Arguments", args[index], args[index+1])
-// 	key := args[index]
-// 	index++
-// 	value := args[index]
-// 	//TODO Need to fix updating ints inside config to ints instead of strings
-// 	viperConfig.UpdateParam(key, value, conf)
-// }
+	c := &get5.Config{}
+	if err := get5.FromFile(cfg.Paths.Input, c); err != nil {
+		fmt.Printf("Error loading input get5-cli configuration file %q: %s\n", cfg.Paths.Input, err)
+		os.Exit(1)
+	}
 
-//TODO WEB APP OPTION
-//Start serving app and listen
-//server := createHTTPServer(conf)
+	c.MapList = opts.Maplist
 
-//if err := server.ListenAndServe(); err != nil {
-//	log.Fatal("fatal server error: ", err)
-//}
-
-func createHTTPServer() *http.Server {
-
-	//r := mux.NewRouter().StrictSlash(true)
-	//server := &http.Server{Addr: ":" + config.Port, Handler: r}
-
-	// //r.Handle("/update-config/{configName}", viperConfig.UpdateConfigWatcher()).Methods(http.MethodPost)
-	// r.HandleFunc("/update-param/", func(w http.ResponseWriter, r *http.Request) {
-	// 	v := r.URL.Query()
-	// 	key := v.Get("key")
-	// 	value := v.Get("value")
-
-	// 	println("key passed", key)
-	// 	println("value passed", value)
-
-	// 	//viperConfig.UpdateParam(key, value, config)
-	// })
-
-	return nil
+	//c.Save("")
 }
