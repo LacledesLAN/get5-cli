@@ -4,7 +4,7 @@
         {
             "label":"Upgrade GO dependencies",
             "type":"shell",
-            "command": "go get -u -t ./... && go mod tidy",
+            "command": "go get -u -t ./... && go mod tidy && go mod download && go mod verify",
             "windows": {
                 "command": "go get -u -t ./...; go mod tidy",
             },
