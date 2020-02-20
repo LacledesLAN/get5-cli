@@ -2,6 +2,96 @@ package get5
 
 import "testing"
 
+func Test_sanitizeConfig(t *testing.T) {
+	t.Parallel()
+
+	t.Run("MapList should have no empty elements or elements with whitespace", func(t *testing.T) {
+		cfg := &Config{
+			MapList: []string{"", "  ", " \r\n \t", "  de_depot\t", "", "   \v "},
+		}
+
+		sanitizeConfig(cfg)
+
+		if len(cfg.MapList) != 1 {
+			t.Errorf("After filtering empty and whitespace values %d map should have remained, but had %d", 1, len(cfg.MapList))
+		}
+
+		if cfg.MapList[0] != "de_depot" {
+			t.Errorf("After removing padding whitespace the map should have been %q not %q", "de_depot", cfg.MapList[0])
+		}
+	})
+
+	t.Run("Filtered MapList should maintain the same order", func(t *testing.T) {
+		cfg := &Config{
+			MapList: []string{"", "  one  ", " \r\n \t", " two\t", "", "   \v "},
+		}
+
+		sanitizeConfig(cfg)
+
+		if cfg.MapList[0] != "one" {
+			t.Errorf("After filtering the first map should have been %q not %q", "one", cfg.MapList[0])
+		}
+
+		if cfg.MapList[1] != "two" {
+			t.Errorf("After filtering the first map should have been %q not %q", "two", cfg.MapList[1])
+		}
+	})
+
+	t.Run("can't have 0 number of maps when maps exist in the MapList", func(t *testing.T) {
+		cfg := &Config{
+			MapList: []string{"", "one", " ", "two", "\t", "three"},
+		}
+
+		sanitizeConfig(cfg)
+
+		if cfg.NumMaps != 3 {
+			t.Errorf("Number of maps should have been reported as %d NOT %d", 3, cfg.NumMaps)
+		}
+	})
+
+	t.Run("filter out any duplicate or whitespace spectators", func(t *testing.T) {
+		cfg := &Config{
+			Spectators: Spectators{
+				Players: []string{"", " \r\n \t \v ", "one", "  one", " one ", "one  ", "two"},
+			},
+		}
+
+		sanitizeConfig(cfg)
+
+		if len(cfg.Spectators.Players) != 2 {
+			t.Errorf("After filtering spectators %d spectators should have remained, but had %d", 2, len(cfg.Spectators.Players))
+		}
+	})
+}
+
+func Test_sanitizePlayers(t *testing.T) {
+	t.Parallel()
+
+	testdata := map[string]string{
+		"":       "this should get filtered out",
+		" one  ": "\r\n\t\v ",
+		" two ":  "  my nickname\r\n",
+	}
+
+	sut := sanitizePlayers(Players(testdata))
+
+	if sut.len() != 2 {
+		t.Errorf("After sanitization there should have been %d players NOT %d", 2, sut.len())
+	}
+
+	if _, ok := (map[string]string)(sut)[""]; ok {
+		t.Error("Element with empty key should have been removed")
+	}
+
+	if value, ok := (map[string]string)(sut)["one"]; !ok || value != "" {
+		t.Errorf("Player with steam id %q should have remained with an empty nickname", "one")
+	}
+
+	if value, ok := (map[string]string)(sut)["two"]; !ok || value != "my nickname" {
+		t.Errorf("Player with steam id %q should have remained with a nickname of %q", "two", "my nickname")
+	}
+}
+
 func Test_Players_UnmarshalJSON(t *testing.T) {
 	t.Parallel()
 

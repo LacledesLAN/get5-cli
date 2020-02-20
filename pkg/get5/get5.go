@@ -37,11 +37,15 @@ func FromFile(path string, cfg *Config) error {
 		return fmt.Errorf("couldn't unmarshal get5 configuration file %q: %w", absPath, err)
 	}
 
+	sanitizeConfig(cfg)
+
 	return nil
 }
 
 // SaveFile saves a get 5 configuration to a json file
 func (c Config) SaveFile(path string) error {
+	sanitizeConfig(&c)
+
 	path = strings.TrimSpace(path)
 	if len(path) == 0 {
 		return errors.New("cannot save a file using an empty or whitespace-only path")
@@ -52,20 +56,34 @@ func (c Config) SaveFile(path string) error {
 		return fmt.Errorf("couldn't determine absolute path of %q: %w", path, err)
 	}
 
-	fileBytes, err := json.Marshal(c)
-	if err != nil {
-		return fmt.Errorf("unable to encode get5 configuration as JSON: %w", err)
-	}
-
 	fh, err := os.OpenFile(absPath, os.O_CREATE|os.O_WRONLY, 0664)
 	if err != nil {
 		return fmt.Errorf("couldn't open file %q for writing: %w", absPath, err)
 	}
 	defer fh.Close()
 
+	fileBytes, err := json.Marshal(c)
+	if err != nil {
+		return fmt.Errorf("unable to encode get5 configuration as JSON: %w", err)
+	}
+
 	if _, err := fh.Write(fileBytes); err != nil {
 		return fmt.Errorf("couldn't write get5 configuration to file %q : %w", absPath, err)
 	}
 
 	return nil
+}
+
+// Validate ensures that a get5 configuration is both syntactically valid as well as usable for a get5 match
+func (c Config) Validate() (isValid bool, issues []string) {
+	l := len(c.MapList)
+	if l == 0 {
+		isValid = false
+		issues = append(issues, "must have at least one map in the map list")
+	} else if l%2 == 0 {
+		isValid = false
+		issues = append(issues, fmt.Sprintf("Must have odd number of maps in the maplist; had: %q", c.MapList))
+	}
+
+	return isValid, issues
 }

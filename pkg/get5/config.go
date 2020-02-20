@@ -30,6 +30,47 @@ type Config struct {
 	Cvars map[string]string `json:"cvars"`
 }
 
+func sanitizeConfig(c *Config) {
+	// MapList should have no empty elements or elements with whitespace
+	var maps []string
+	for _, m := range c.MapList {
+		m = strings.TrimSpace(m)
+
+		if len(m) > 0 {
+			maps = append(maps, m)
+		}
+	}
+	c.MapList = maps
+
+	// can't have 0 maps; derive from number of elements in MapList
+	if c.NumMaps < 1 {
+		c.NumMaps = uint(len(c.MapList))
+	}
+
+	// filter out any duplicate or whitespace spectators
+	if len(c.Spectators.Players) > 0 {
+		keys := make(map[string]bool, len(c.Spectators.Players))
+		spectators := []string{}
+
+		for _, s := range c.Spectators.Players {
+			s = strings.TrimSpace(s)
+			if len(s) == 0 {
+				continue
+			}
+
+			if _, found := keys[s]; !found {
+				keys[s] = true
+				spectators = append(spectators, s)
+			}
+		}
+
+		c.Spectators.Players = spectators
+	}
+
+	c.Team1.Players = sanitizePlayers(c.Team1.Players)
+	c.Team2.Players = sanitizePlayers(c.Team2.Players)
+}
+
 // Spectators are players who are allowed to spectate the server
 type Spectators struct {
 	Players []string `json:"players"`
@@ -53,6 +94,25 @@ func (p Players) len() int {
 	}
 
 	return len((map[string]string)(p))
+}
+
+func sanitizePlayers(p Players) Players {
+	buf := map[string]string{}
+
+	// filter out whitespace-only keys and trim and values
+	for k, v := range (map[string]string)(p) {
+		k = strings.TrimSpace(k)
+
+		if len(k) == 0 {
+			continue
+		}
+
+		if _, found := buf[k]; !found {
+			buf[k] = strings.TrimSpace(v)
+		}
+	}
+
+	return Players(buf)
 }
 
 // UnmarshalJSON parses the JSON-encoded "Players" data into the parent struct
