@@ -4,33 +4,69 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"math"
 	"strings"
+	"time"
 )
 
 // Config represents a get5 configuration
 type Config struct {
-	MatchID        string `json:"matchid"`
-	NumMaps        uint   `json:"num_maps"`
-	PlayersPerTeam byte   `json:"players_per_team"`
-	// MinPlayersToReady is the number of players a team must have ready to begin
+	// MatchID is a unique string matchid used to identify the match
+	MatchID string `json:"matchid"`
+	// NumberOfMaps in the series; must be positive, odd number
+	NumberOfMaps uint `json:"num_maps"`
+	// MapList is the maps in use for the match; should be an odd-sized list
+	MapList []string `json:"maplist"`
+	// SkipVeto determines whether the veto will be skipped and all the maps will come from the maplist (in the given order)
+	SkipVeto bool `json:"skip_veto"`
+	// VetoFirst either "team1", or "team2". If not set, or set to any other value, team 1 will veto first.
+	VetoFirst string `json:"vetofirst"`
+	// SideType either "standard", "never_knife", or "always_knife"; standard means the team that doesn't pick a map gets the side choice, never_knife
+	// 	means team1 is always on CT first, and always knife means there is always a knife round.
+	SideType string `json:"side_type"`
+	// PlayersPerTeam maximum players per team (doesn't include a coach spot, default: 5)
+	PlayersPerTeam byte `json:"players_per_team"`
+	// MinPlayersToReady is the minimum players a team needs to be able to ready up (default: 1)
 	MinPlayersToReady byte `json:"min_player_to_ready"`
 	// MinSpectatorsToReady is the number of spectators that must be ready to begin
-	MinSpectatorsToReady byte   `json:"min_spectators_to_ready"`
-	SkipVeto             bool   `json:"skip_veto"`
-	VetoFirst            string `json:"vetofirst"`
-	SideType             string `json:"side_type"`
+	MinSpectatorsToReady byte `json:"min_spectators_to_ready"`
 	// Spectators contains players that are allow to spectate
 	Spectators Spectators `json:"spectators"`
-	MapList    []string   `json:"maplist"`
 	// Team1 starts as Counter-Terrorists (mp_team1)
 	Team1 Team `json:"team1"`
 	// Team2 starts as Terrorists (mp_team2)
 	Team2 Team `json:"team2"`
-	// Cvars that will be executed on each map start or config load.
+	// Cvars that will be executed during match warmup/knife round/live state
 	Cvars map[string]string `json:"cvars"`
+	// TODO: favored_percentage_team1: wrapper for mp_teamprediction_pct
+	// TODO: favored_percentage_text wrapper for mp_teamprediction_txt
 }
 
 func sanitizeConfig(c *Config) {
+	c.MatchID = strings.TrimSpace(c.MatchID)
+	if len(c.MatchID) == 0 {
+		t := time.Now()
+		c.MatchID = t.Format("csgo2006.01.02.150405")
+	}
+
+	c.VetoFirst = strings.TrimSpace(strings.ToLower(c.VetoFirst))
+	if c.VetoFirst != "team2" {
+		c.VetoFirst = "team1"
+	}
+
+	c.SideType = strings.TrimSpace(strings.ToLower(c.SideType))
+	if c.SideType != "always_knife" && c.SideType != "never_knife" {
+		c.SideType = "standard"
+	}
+
+	if c.PlayersPerTeam < 1 || c.PlayersPerTeam >= math.MaxUint8-1 {
+		c.PlayersPerTeam = 5
+	}
+
+	if c.MinPlayersToReady < 1 || c.MinPlayersToReady > 48 {
+		c.MinPlayersToReady = 1
+	}
+
 	// MapList should have no empty elements or elements with whitespace
 	var maps []string
 	for _, m := range c.MapList {
@@ -43,8 +79,8 @@ func sanitizeConfig(c *Config) {
 	c.MapList = maps
 
 	// can't have 0 maps; derive from number of elements in MapList
-	if c.NumMaps < 1 {
-		c.NumMaps = uint(len(c.MapList))
+	if c.NumberOfMaps < 1 {
+		c.NumberOfMaps = uint(len(c.MapList))
 	}
 
 	// filter out any duplicate or whitespace spectators
@@ -67,8 +103,24 @@ func sanitizeConfig(c *Config) {
 		c.Spectators.Players = spectators
 	}
 
-	c.Team1.Players = sanitizePlayers(c.Team1.Players)
-	c.Team2.Players = sanitizePlayers(c.Team2.Players)
+	// filter out empty/whitespace cvars (both key and value)
+	if len(c.Cvars) > 0 {
+		buf := map[string]string{}
+
+		for key, value := range c.Cvars {
+			key = strings.TrimSpace(key)
+			value = strings.TrimSpace(value)
+
+			if len(key) > 0 && len(value) > 0 {
+				buf[key] = value
+			}
+		}
+
+		c.Cvars = buf
+	}
+
+	c.Team1 = sanitizeTeam(c.Team1)
+	c.Team2 = sanitizeTeam(c.Team2)
 }
 
 // Spectators are players who are allowed to spectate the server
@@ -78,11 +130,28 @@ type Spectators struct {
 
 // Team represents a CSGO side
 type Team struct {
-	Name    string  `json:"name"`
-	Tag     string  `json:"tag"`
-	Flag    string  `json:"flag"`
-	Logo    string  `json:"logo"`
+	// Name (wraps mp_teamname_# and is displayed often in chat messages)
+	Name string `json:"name"`
+	// Tag (or short name), this replaces client "clan tags"
+	Tag string `json:"tag"`
+	// Flag team flag (2 letter country code, wraps mp_teamflag_#)
+	Flag string `json:"flag"`
+	// Logo (wraps mp_teamlogo_#)
+	Logo string `json:"logo"`
+	// Players list of Steam id's for users on the team (not used if get5_check_auths is set to 0). You can also force player names in here; in JSON you may use either an array of steamids or a dictionary of steamids to names.
 	Players Players `json:"players"`
+	// current score in the series, this can be used to give a team a map advantage or used as a manual backup method, defaults to 0
+	SeriesScore int `json:"series_score"`
+}
+
+func sanitizeTeam(t Team) Team {
+	if t.SeriesScore < 0 {
+		t.SeriesScore = 0
+	}
+
+	t.Players = sanitizePlayers(t.Players)
+
+	return t
 }
 
 // Players represents connected CSGO clients (including bots)
