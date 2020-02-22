@@ -7,13 +7,10 @@
 	"skip_veto": true,
 	"veto_first": "team1",
 	"side_type": "always_knife",
-
 	"spectators": {
 		"players": []
 	},
-
 	"maplist":	[],
-
 	"team1": {
 		"name": "mp_team1",
 		"tag": "",
@@ -21,7 +18,6 @@
 		"logo": "",
 		"players": {}
 	},
-
 	"team2": {
 		"name": "mp_team1",
 		"tag": "",
@@ -29,6 +25,5 @@
 		"logo": "",
 		"players": {}
 	},
-
 	"cvars": {}
 }
