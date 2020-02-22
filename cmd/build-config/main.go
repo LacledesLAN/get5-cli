@@ -51,6 +51,11 @@ func main() {
 		}
 	}
 
+	//Removing duplicate maps
+	fmt.Println(opts.Maplist)
+	opts.Maplist = checkUniqueMaps(opts.Maplist)
+	fmt.Println(opts.Maplist)
+
 	if len(opts.Maplist)%2 == 0 {
 		fmt.Println("Must provide an odd number of maps")
 		os.Exit(1)
@@ -79,4 +84,20 @@ func main() {
 	}
 
 	get5Cfg.SaveFile(wrapperCfg.Paths.Output)
+}
+
+func checkUniqueMaps(elements []string) []string {
+	encountered := map[string]bool{}
+
+	// Create a map of all unique elements.
+	for v := range elements {
+		encountered[elements[v]] = true
+	}
+
+	// Place all keys from the map into a slice.
+	result := []string{}
+	for key, _ := range encountered {
+		result = append(result, key)
+	}
+	return result
 }
