@@ -62,9 +62,13 @@ func main() {
 		os.Exit(42)
 	}
 
+	fmt.Printf("Match: %s\n", opts.MatchID)
 	get5Cfg.MatchID = strings.TrimSpace(opts.MatchID)
+	fmt.Printf("map list: %v\n", opts.Maplist)
 	get5Cfg.MapList = opts.Maplist
+	fmt.Printf("team 1 name: %s\n", opts.Team1Name)
 	get5Cfg.Team1.Name = strings.TrimSpace(opts.Team1Name)
+	fmt.Printf("team 2 name: %s\n", opts.Team2Name)
 	get5Cfg.Team2.Name = strings.TrimSpace(opts.Team2Name)
 
 	get5Cfg.SaveFile(wrapperCfg.Paths.Output)
