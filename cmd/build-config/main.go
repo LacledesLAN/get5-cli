@@ -62,8 +62,21 @@ func main() {
 		os.Exit(42)
 	}
 
-	get5Cfg.MatchID = opts.MatchID
-	get5Cfg.MapList = opts.Maplist
+	if len(strings.TrimSpace(opts.MatchID)) == 0 {
+		get5Cfg.MatchID = strings.TrimSpace(opts.MatchID)
+	}
+
+	if len(opts.Maplist) == 0 {
+		get5Cfg.MapList = opts.Maplist
+	}
+
+	if len(strings.TrimSpace(opts.Team1Name)) == 0 {
+		get5Cfg.Team1.Name = strings.TrimSpace(opts.Team1Name)
+	}
+
+	if len(strings.TrimSpace(opts.Team2Name)) == 0 {
+		get5Cfg.Team2.Name = strings.TrimSpace(opts.Team2Name)
+	}
 
 	get5Cfg.SaveFile(wrapperCfg.Paths.Output)
 }

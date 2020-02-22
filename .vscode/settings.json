@@ -25,6 +25,7 @@
         "run",
         "sourceseer",
         "srcds",
-        "unmarshalling"
+        "unmarshalling",
+        "vetofirst"
     ],
 }
