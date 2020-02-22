@@ -42,3 +42,4 @@ ehthumbs_vista.db
 Thumbs.db
 $RECYCLE.BIN/
 *.lnk
+cmd/build-config/csgo/automatch.json
