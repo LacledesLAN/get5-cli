@@ -17,10 +17,11 @@ func prettyPrint(i interface{}) string {
 }
 
 var opts struct {
-	CfgFile           string   `long:"cfg" description:"full path the get5-cli configuration file"`
-	MatchID           string   `long:"id" description:"A unique ID to identify the get5 match" required:"true"`
-	Maplist           []string `long:"map" description:"list of maps to use for the get5 match; must be an odd number" required:"true"`
-	MinPlayersToReady byte     `long:"playerstoready" description:"Minimum players a team needs to be able to ready up"`
+	CfgFile   string   `long:"cfg" description:"full path the get5-cli configuration file"`
+	MatchID   string   `long:"id" description:"A unique ID to identify the get5 match" required:"true"`
+	Maplist   []string `long:"map" description:"list of maps to use for the get5 match; must be an odd number" required:"true"`
+	Team1Name string   `long:"team1" description:"The name for team1" required:"true"`
+	Team2Name string   `long:"team2" description:"The name for team2" required:"true"`
 }
 
 func main() {
@@ -29,6 +30,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	wrapperCfg := Config{}
 	if len(strings.TrimSpace(opts.CfgFile)) == 0 {
 		path, err := os.Getwd()
 
@@ -37,13 +39,16 @@ func main() {
 			os.Exit(1)
 		}
 
-		opts.CfgFile = filepath.Join(path, "get5-cli.json")
-	}
-
-	cfg := &Config{}
-	if err := LoadConfig(opts.CfgFile, cfg); err != nil {
-		fmt.Printf("Error loading get5-cli configuration file %q: %s\n", opts.CfgFile, err)
-		os.Exit(1)
+		f := filepath.Join(path, "get5-wrapper.json")
+		fmt.Printf("Loading from: %s\n", f)
+		if err := LoadConfig(f, &wrapperCfg); err != nil {
+			panic(err)
+		}
+	} else {
+		if err := LoadConfig(opts.CfgFile, &wrapperCfg); err != nil {
+			fmt.Printf("Error loading get5-cli configuration file %q: %s\n", opts.CfgFile, err)
+			os.Exit(87)
+		}
 	}
 
 	if len(opts.Maplist)%2 == 0 {
@@ -51,13 +56,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	c := &get5.Config{}
-	if err := get5.FromFile(cfg.Paths.Input, c); err != nil {
-		fmt.Printf("Error loading input get5-cli configuration file %q: %s\n", cfg.Paths.Input, err)
-		os.Exit(1)
+	get5Cfg := &get5.Config{}
+	if err := get5.FromFile(wrapperCfg.Paths.Input, get5Cfg); err != nil {
+		fmt.Printf("Error loading input get5-cli configuration file %q: %s\n", wrapperCfg.Paths.Input, err)
+		os.Exit(42)
 	}
 
-	c.MapList = opts.Maplist
+	get5Cfg.MatchID = opts.MatchID
+	get5Cfg.MapList = opts.Maplist
 
-	//c.Save("")
+	get5Cfg.SaveFile(wrapperCfg.Paths.Output)
 }

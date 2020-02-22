@@ -62,7 +62,7 @@ func (c Config) SaveFile(path string) error {
 	}
 	defer fh.Close()
 
-	fileBytes, err := json.Marshal(c)
+	fileBytes, err := json.MarshalIndent(c, "", "\t")
 	if err != nil {
 		return fmt.Errorf("unable to encode get5 configuration as JSON: %w", err)
 	}

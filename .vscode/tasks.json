@@ -2,6 +2,17 @@
     "version":"2.0.0",
     "tasks":[
         {
+            "label":"Docker builder",
+            "type":"shell",
+            "command": "docker build . -f tourney.Dockerfile --tag lltest/get5",
+            "group":"none",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": [],
+        },
+        {
             "label":"Upgrade GO dependencies",
             "type":"shell",
             "command": "go get -u -t ./... && go mod tidy && go mod download && go mod verify",

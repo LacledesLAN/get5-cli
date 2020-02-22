@@ -44,6 +44,7 @@ func LoadConfig(p string, c *Config) error {
 	if err != nil {
 		return fmt.Errorf("couldn't read get5 config file %q: %w", absPath, err)
 	}
+	fmt.Printf("Loaded paths config file %s\n", absPath)
 
 	if err = json.Unmarshal(jsonBytes, &c); err != nil {
 		return fmt.Errorf("couldn't unmarshal get5 configuration file %q: %w", absPath, err)
