@@ -14,7 +14,7 @@ type Config struct {
 	// MatchID is a unique string matchid used to identify the match
 	MatchID string `json:"matchid"`
 	// NumberOfMaps in the series; must be positive, odd number
-	NumberOfMaps uint `json:"num_maps"`
+	NumberOfMaps int `json:"num_maps"`
 	// MapList is the maps in use for the match; should be an odd-sized list
 	MapList []string `json:"maplist"`
 	// SkipVeto determines whether the veto will be skipped and all the maps will come from the maplist (in the given order)
@@ -80,7 +80,7 @@ func sanitizeConfig(c *Config) {
 
 	// can't have 0 maps; derive from number of elements in MapList
 	if c.NumberOfMaps < 1 {
-		c.NumberOfMaps = uint(len(c.MapList))
+		c.NumberOfMaps = len(c.MapList)
 	}
 
 	// filter out any duplicate or whitespace spectators

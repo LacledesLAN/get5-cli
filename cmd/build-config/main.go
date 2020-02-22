@@ -17,11 +17,13 @@ func prettyPrint(i interface{}) string {
 }
 
 var opts struct {
-	CfgFile   string   `long:"cfg" description:"full path the get5-cli configuration file"`
-	MatchID   string   `long:"id" description:"A unique ID to identify the get5 match" required:"true"`
-	Maplist   []string `long:"map" description:"list of maps to use for the get5 match; must be an odd number" required:"true"`
-	Team1Name string   `long:"team1" description:"The name for team1" required:"true"`
-	Team2Name string   `long:"team2" description:"The name for team2" required:"true"`
+	CfgFile        string   `long:"cfg" description:"full path the get5-cli configuration file"`
+	MatchID        string   `long:"id" description:"A unique ID to identify the get5 match" required:"true"`
+	Maplist        []string `long:"map" description:"list of maps to use for the get5 match; must be an odd number" required:"true"`
+	MinPlayers     byte     `long:"minready" description:"The minimum players a team needs to be able to ready up" default:"5"`
+	PlayersPerTeam byte     `long:"teamsize" description:" The maximum players per team (doesn't include a coach spot)" default:"5"`
+	Team1Name      string   `long:"team1" description:"The name for team1" required:"true"`
+	Team2Name      string   `long:"team2" description:"The name for team2" required:"true"`
 }
 
 func main() {
@@ -62,14 +64,28 @@ func main() {
 		os.Exit(42)
 	}
 
-	fmt.Printf("Match: %s\n", opts.MatchID)
+	fmt.Print("\nCreating get5 configuration\n")
+
+	fmt.Printf("\tMatch ID is %q\n", opts.MatchID)
 	get5Cfg.MatchID = strings.TrimSpace(opts.MatchID)
-	fmt.Printf("map list: %v\n", opts.Maplist)
+
+	fmt.Printf("\tMap list is: %v\n", opts.Maplist)
 	get5Cfg.MapList = opts.Maplist
-	fmt.Printf("team 1 name: %s\n", opts.Team1Name)
+	get5Cfg.NumberOfMaps = len(opts.Maplist)
+
+	fmt.Printf("\tMinimum players per team to ready up %d\n", opts.MinPlayers)
+	get5Cfg.MinPlayersToReady = opts.MinPlayers
+
+	fmt.Printf("\tTeam 1's name is %q\n", opts.Team1Name)
 	get5Cfg.Team1.Name = strings.TrimSpace(opts.Team1Name)
-	fmt.Printf("team 2 name: %s\n", opts.Team2Name)
+
+	fmt.Printf("\tTeam 2's name is %q\n", opts.Team2Name)
 	get5Cfg.Team2.Name = strings.TrimSpace(opts.Team2Name)
+
+	fmt.Printf("\tTeam size is: %d\n", opts.PlayersPerTeam)
+	get5Cfg.PlayersPerTeam = opts.PlayersPerTeam
+
+	fmt.Print("\n")
 
 	get5Cfg.SaveFile(wrapperCfg.Paths.Output)
 }
