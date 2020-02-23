@@ -78,12 +78,10 @@ func (c Config) SaveFile(path string) error {
 func (c Config) Validate() (isValid bool, issues []string) {
 	l := len(c.MapList)
 	if l == 0 {
-		isValid = false
 		issues = append(issues, "must have at least one map in the map list")
 	} else if l%2 == 0 {
-		isValid = false
 		issues = append(issues, fmt.Sprintf("Must have odd number of maps in the maplist; had: %q", c.MapList))
 	}
 
-	return isValid, issues
+	return len(issues) == 0, issues
 }

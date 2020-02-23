@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -11,13 +10,9 @@ import (
 	"github.com/jessevdk/go-flags"
 )
 
-func prettyPrint(i interface{}) string {
-	s, _ := json.MarshalIndent(i, "", "\t")
-	return string(s)
-}
-
 var opts struct {
-	CfgFile        string   `long:"cfg" description:"full path the get5-cli configuration file"`
+	BaseFile       string   `long:"basefile" description:"full path to the base get5 configuration file to load"`
+	CfgFile        string   `long:"cfgfile" description:"full path to the get5-cli configuration file"`
 	MatchID        string   `long:"id" description:"A unique ID to identify the get5 match" required:"true"`
 	Maplist        []string `long:"map" description:"list of maps to use for the get5 match; must be an odd number" required:"true"`
 	MinPlayers     byte     `long:"minready" description:"The minimum players a team needs to be able to ready up" default:"5"`
@@ -28,64 +23,79 @@ var opts struct {
 
 func main() {
 	if _, err := flags.Parse(&opts); err != nil {
-		fmt.Println("Couldn't parse arguments from command line")
-		os.Exit(1)
+		fmt.Printf("Encountered error while parsing arguments from the command line: %s\n", err)
+		os.Exit(8)
 	}
 
-	wrapperCfg := Config{}
+	if len(opts.Maplist)%2 < 1 && len(opts.Maplist)%2 == 0 {
+		fmt.Printf("Must provide a positive, odd number of maps; got: %v\n", opts.Maplist)
+		os.Exit(61)
+	}
+
 	if len(strings.TrimSpace(opts.CfgFile)) == 0 {
 		path, err := os.Getwd()
 
 		if err != nil {
-			fmt.Println("Couldn't determine current working directory")
-			os.Exit(1)
+			fmt.Printf("Encountered error while determining the current working directory: %s\n", err)
+			os.Exit(2)
 		}
 
-		f := filepath.Join(path, "get5-wrapper.json")
-		fmt.Printf("Loading from: %s\n", f)
-		if err := LoadConfig(f, &wrapperCfg); err != nil {
-			panic(err)
-		}
-	} else {
-		if err := LoadConfig(opts.CfgFile, &wrapperCfg); err != nil {
-			fmt.Printf("Error loading get5-cli configuration file %q: %s\n", opts.CfgFile, err)
-			os.Exit(87)
-		}
+		opts.CfgFile = filepath.Join(path, "get5-wrapper.json")
 	}
 
-	if len(opts.Maplist)%2 == 0 {
-		fmt.Println("Must provide an odd number of maps")
-		os.Exit(1)
+	wrapperCfg := Config{}
+	if err := LoadConfig(opts.CfgFile, &wrapperCfg); err != nil {
+		fmt.Printf("Encountered error loading cli configuration file: %s\n", err)
+		os.Exit(22)
+	}
+	fmt.Printf("Loaded cli configuration file: %s\n", opts.CfgFile)
+
+	if len(strings.TrimSpace(opts.BaseFile)) > 0 {
+		wrapperCfg.Paths.Input = strings.TrimSpace(opts.BaseFile)
 	}
 
 	get5Cfg := &get5.Config{}
 	if err := get5.FromFile(wrapperCfg.Paths.Input, get5Cfg); err != nil {
-		fmt.Printf("Error loading input get5-cli configuration file %q: %s\n", wrapperCfg.Paths.Input, err)
+		fmt.Printf("Encountered error loading base get5 configuration file %q: %s\n", wrapperCfg.Paths.Input, err)
 		os.Exit(42)
 	}
+	fmt.Printf("Loaded base get5 configuration file: %s\n", wrapperCfg.Paths.Input)
 
-	fmt.Print("\nCreating get5 configuration\n")
+	fmt.Print("\nModifying base get5 configuration\n")
 
-	fmt.Printf("\tMatch ID is %q\n", opts.MatchID)
+	fmt.Printf("\t• Match ID to %q\n", opts.MatchID)
 	get5Cfg.MatchID = strings.TrimSpace(opts.MatchID)
 
-	fmt.Printf("\tMap list is: %v\n", opts.Maplist)
+	fmt.Printf("\t• Map list to: %v\n", opts.Maplist)
 	get5Cfg.MapList = opts.Maplist
 	get5Cfg.NumberOfMaps = len(opts.Maplist)
 
-	fmt.Printf("\tMinimum players per team to ready up %d\n", opts.MinPlayers)
+	fmt.Printf("\t• Minimum players per team to ready up to %d\n", opts.MinPlayers)
 	get5Cfg.MinPlayersToReady = opts.MinPlayers
 
-	fmt.Printf("\tTeam 1's name is %q\n", opts.Team1Name)
+	fmt.Printf("\t• Team 1's name to %q\n", opts.Team1Name)
 	get5Cfg.Team1.Name = strings.TrimSpace(opts.Team1Name)
 
-	fmt.Printf("\tTeam 2's name is %q\n", opts.Team2Name)
+	fmt.Printf("\t• Team 2's name to %q\n", opts.Team2Name)
 	get5Cfg.Team2.Name = strings.TrimSpace(opts.Team2Name)
 
-	fmt.Printf("\tTeam size is: %d\n", opts.PlayersPerTeam)
+	fmt.Printf("\t• Team size to: %d\n", opts.PlayersPerTeam)
 	get5Cfg.PlayersPerTeam = opts.PlayersPerTeam
 
-	fmt.Print("\n")
+	if ok, issues := get5Cfg.Validate(); !ok {
+		fmt.Print("\nget5 configuration failed validation:\n")
 
-	get5Cfg.SaveFile(wrapperCfg.Paths.Output)
+		for _, issue := range issues {
+			fmt.Printf("\t• %s\n", issue)
+		}
+
+		os.Exit(124)
+	}
+
+	if err := get5Cfg.SaveFile(wrapperCfg.Paths.Output); err != nil {
+		fmt.Printf("Encountered error saving get5 configuration file to %q: %s", wrapperCfg.Paths.Output, err)
+		os.Exit(43)
+	}
+
+	fmt.Printf("\nSaved get5 configuration file to %q\n", wrapperCfg.Paths.Output)
 }
