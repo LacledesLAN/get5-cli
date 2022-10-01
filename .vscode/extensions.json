@@ -1,7 +1,8 @@
 {
     "recommendations": [
-		"editorconfig.editorconfig",
-        "ms-vscode.go",
+        "davidanson.vscode-markdownlint",
+        "editorconfig.editorconfig",
+        "golang.go",
         "streetsidesoftware.code-spell-checker",
     ]
 }
