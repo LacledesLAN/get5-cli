@@ -25,5 +25,5 @@ jobs:
         with:
           artifacts: "./get5"
           allowUpdates: true
-          commit: true
+          name: "latest"
           token: ${{ secrets.GET5CLI_RELEASE_TOKEN }}
