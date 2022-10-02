@@ -11,7 +11,7 @@ import (
 )
 
 // FromFile loads a get 5 configuration json from a filesystem path.
-func FromFile(path string, cfg *Config) error {
+func FromFile(path string, cfg *Match) error {
 	path = strings.TrimSpace(path)
 	if len(path) == 0 {
 		return errors.New("cannot load a file using an empty or whitespace-only path")
@@ -37,14 +37,14 @@ func FromFile(path string, cfg *Config) error {
 		return fmt.Errorf("couldn't unmarshal get5 configuration file %q: %w", absPath, err)
 	}
 
-	sanitizeConfig(cfg)
+	sanitizeMatch(cfg)
 
 	return nil
 }
 
 // SaveFile saves a get 5 configuration to a json file
-func (c Config) SaveFile(path string) error {
-	sanitizeConfig(&c)
+func SaveFile(c Match, path string) error {
+	sanitizeMatch(&c)
 
 	path = strings.TrimSpace(path)
 	if len(path) == 0 {
@@ -75,7 +75,7 @@ func (c Config) SaveFile(path string) error {
 }
 
 // Validate ensures that a get5 configuration is both syntactically valid as well as usable for a get5 match
-func (c Config) Validate() (isValid bool, issues []string) {
+func (c Match) Validate() (isValid bool, issues []string) {
 	l := len(c.MapList)
 	if l == 0 {
 		issues = append(issues, "must have at least one map in the map list")

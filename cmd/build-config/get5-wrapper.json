@@ -1,6 +1,0 @@
-{
-    "paths": {
-        "input": "./csgo/llbase.json",
-        "output": "./csgo/automatch.json"
-    }
-}

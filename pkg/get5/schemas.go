@@ -6,13 +6,16 @@ import (
 	"fmt"
 	"math"
 	"strings"
-	"time"
 )
 
-// Config represents a get5 configuration
-type Config struct {
+// Match represents a get5 match
+type Match struct {
 	// MatchID is a unique string matchid used to identify the match
-	MatchID string `json:"matchid"`
+	MatchID string `json:"matchid,omitempty"`
+	// MatchTitle is the name of the match
+	MatchTitle string `json:"match_title,omitempty"`
+	// ClinchSeries If false, the entire map list will be played, regardless of score. If true, a series will be won when the series score for a team exceeds the number of maps divided by two.
+	// ClinchSeries bool `json:"clinch_series"`
 	// NumberOfMaps in the series; must be positive, odd number
 	NumberOfMaps int `json:"num_maps"`
 	// MapList is the maps in use for the match; should be an odd-sized list
@@ -33,21 +36,15 @@ type Config struct {
 	// Spectators contains players that are allow to spectate
 	Spectators Spectators `json:"spectators"`
 	// Team1 starts as Counter-Terrorists (mp_team1)
-	Team1 Team `json:"team1"`
+	Team1 MatchTeam `json:"team1,omitempty"`
 	// Team2 starts as Terrorists (mp_team2)
-	Team2 Team `json:"team2"`
+	Team2 MatchTeam `json:"team2,omitempty"`
 	// Cvars that will be executed during match warmup/knife round/live state
 	Cvars map[string]string `json:"cvars"`
-	// TODO: favored_percentage_team1: wrapper for mp_teamprediction_pct
-	// TODO: favored_percentage_text wrapper for mp_teamprediction_txt
 }
 
-func sanitizeConfig(c *Config) {
+func sanitizeMatch(c *Match) {
 	c.MatchID = strings.TrimSpace(c.MatchID)
-	if len(c.MatchID) == 0 {
-		t := time.Now()
-		c.MatchID = t.Format("csgo2006.01.02.150405")
-	}
 
 	c.VetoFirst = strings.TrimSpace(strings.ToLower(c.VetoFirst))
 	if c.VetoFirst != "team2" {
@@ -119,17 +116,17 @@ func sanitizeConfig(c *Config) {
 		c.Cvars = buf
 	}
 
-	c.Team1 = sanitizeTeam(c.Team1)
-	c.Team2 = sanitizeTeam(c.Team2)
+	c.Team1 = sanitizeMatchTeam(c.Team1)
+	c.Team2 = sanitizeMatchTeam(c.Team2)
 }
 
 // Spectators are players who are allowed to spectate the server
 type Spectators struct {
-	Players []string `json:"players"`
+	Players []string `json:"players,omitempty"`
 }
 
 // Team represents a CSGO side
-type Team struct {
+type MatchTeam struct {
 	// Name (wraps mp_teamname_# and is displayed often in chat messages)
 	Name string `json:"name"`
 	// Tag (or short name), this replaces client "clan tags"
@@ -144,7 +141,7 @@ type Team struct {
 	SeriesScore int `json:"series_score"`
 }
 
-func sanitizeTeam(t Team) Team {
+func sanitizeMatchTeam(t MatchTeam) MatchTeam {
 	if t.SeriesScore < 0 {
 		t.SeriesScore = 0
 	}

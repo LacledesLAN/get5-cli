@@ -7,11 +7,12 @@
         "editor.rulers": [160],
     },
     "[markdown]": {
-        "editor.rulers": [100],
+        "editor.rulers": [140],
     },
     "cSpell.words": [
         "auths",
         "automatch",
+        "basefile",
         "cfgfile",
         "csgo",
         "cvar",
