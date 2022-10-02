@@ -20,10 +20,8 @@ jobs:
 #        run: go test -v ./...
       - name: Build
         run: go build -o ./get5 ./cmd/build-config/main.go
-      - name: publish release
-        uses: ncipollo/release-action@v1
+      - name: Save artifact
+        uses: actions/upload-artifact@v3
         with:
-          artifacts: "./get5"
-          allowUpdates: true
-          name: "latest"
-          token: ${{ secrets.GET5CLI_RELEASE_TOKEN }}
+          name: get5-cli
+          path: ./get5
