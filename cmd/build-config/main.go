@@ -10,21 +10,20 @@ import (
 )
 
 var opts struct {
-	BaseSchemaPath    string   `long:"base-schema" description:"full path to the base get5 configuration file to load (default: ./csgo/base-schema.json)" required:"false"`
-	DestSchemaPath    string   `long:"dest-schema" description:"full path to the destination schema to generate (default './csgo/automatch.json')" required:"false"`
-	NumberOfMaps      byte     `long:"map-count" description:"the number of maps to include in the series (default 3)" required:"false"`
-	Maplist           []string `long:"map" description:"list of maps to use for the get5 match; must be an odd number" required:"true"`
-	MatchTitle        string   `long:"match-title" description:"the name of the match" required:"false"`
-	MinPlayersToReady byte     `long:"min-ready" description:"The minimum players a team needs to be able to ready up" required:"false"`
-	PlayersPerTeam    byte     `long:"team-size" description:" The maximum players per team (doesn't include a coach spot)" required:"false"`
-	Team1Name         string   `long:"team1-name" description:"the name for team1" required:"true"`
-	Team1Score        byte     `long:"team1-score" description:"the team's current score in the series" required:"false"`
-	Team2Name         string   `long:"team2-name" description:"The name for team2" required:"true"`
-	Team2Score        byte     `long:"team2-score" description:"the team's current score in the series" required:"false"`
+	BaseSchemaPath    string   `long:"base-schema" description:"path to the base get5 configuration file to load (default: ./csgo/base-schema.json)"`
+	DestSchemaPath    string   `long:"dest-schema" description:"path to the destination schema to generate (default './csgo/automatch.json')"`
+	NumberOfMaps      byte     `long:"map-count" short:"c" description:"the number of maps to include in the series (default 3)"`
+	Maplist           []string `long:"map-list" short:"m" description:"list of maps to use for the get5 match; must be an odd number" required:"true"`
+	MatchTitle        string   `long:"match-title" description:"the name of the match"`
+	MinPlayersToReady byte     `long:"min-ready" description:"The minimum players a team needs to be able to ready up"`
+	PlayersPerTeam    byte     `long:"team-size" description:" The maximum players per team (doesn't include a coach spot)"`
+	Team1Name         string   `long:"team1-name" short:"1" description:"the name for team1" required:"true"`
+	Team1Score        byte     `long:"team1-score" description:"the team's current score in the series"`
+	Team2Name         string   `long:"team2-name" short:"2" description:"The name for team2" required:"true"`
+	Team2Score        byte     `long:"team2-score" description:"the team's current score in the series"`
 }
 
 func main() {
-
 	//
 	// VALIDATE COMMAND LINE ARGUMENTS
 	//
@@ -93,7 +92,7 @@ func main() {
 
 	if opts.NumberOfMaps > 0 {
 		fmt.Printf("\t• Setting number of maps to %d\n", opts.NumberOfMaps)
-		wipSchema.NumberOfMaps = int(opts.NumberOfMaps)
+		*wipSchema.NumberOfMaps = int(opts.NumberOfMaps)
 	}
 
 	fmt.Printf("\t• Setting maplist to: [%s]\n", opts.Maplist)
@@ -107,12 +106,12 @@ func main() {
 
 	if opts.MinPlayersToReady > 0 {
 		fmt.Printf("\t• Setting min players ready to %d\n", opts.MinPlayersToReady)
-		wipSchema.MinPlayersToReady = opts.MinPlayersToReady
+		wipSchema.MinPlayersToReady = &opts.MinPlayersToReady
 	}
 
 	if opts.PlayersPerTeam > 0 {
 		fmt.Printf("\t• Setting players per team to %d\n", opts.PlayersPerTeam)
-		wipSchema.PlayersPerTeam = opts.PlayersPerTeam
+		wipSchema.PlayersPerTeam = &opts.PlayersPerTeam
 	}
 
 	fmt.Printf("\t• Setting team 1 name to %s\n", opts.Team1Name)
