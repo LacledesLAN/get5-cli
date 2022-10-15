@@ -9,8 +9,8 @@ import (
 	"strings"
 )
 
-// FromFile loads a get 5 configuration json from a filesystem path.
-func FromFile(path string, cfg *Match) error {
+// OpenSchemaFile loads a get 5 configuration json from a filesystem path.
+func OpenSchemaFile(path string, cfg *Match) error {
 	path = strings.TrimSpace(path)
 	if len(path) == 0 {
 		return errors.New("cannot load a file using an empty or whitespace-only path")
@@ -43,8 +43,8 @@ func FromFile(path string, cfg *Match) error {
 	return nil
 }
 
-// SaveFile saves a get 5 configuration to a json file
-func SaveFile(c Match, path string) error {
+// SaveSchemaFile saves a get 5 configuration to a json file
+func SaveSchemaFile(c Match, path string) error {
 	if err := sanitizeMatch(&c); err != nil {
 		return fmt.Errorf("generated schema file was invalid: %w", err)
 	}
@@ -63,6 +63,8 @@ func SaveFile(c Match, path string) error {
 	if err != nil {
 		return fmt.Errorf("unable to encode get5 configuration as JSON: %w", err)
 	}
+
+	fileBytes = append(fileBytes, []byte("\n")...)
 
 	if !json.Valid(fileBytes) {
 		return fmt.Errorf("generated json file format was invalid.")

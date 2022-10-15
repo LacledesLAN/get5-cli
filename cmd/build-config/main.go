@@ -90,7 +90,7 @@ func main() {
 	// LOAD BASE SCHEMA
 	//
 	wipSchema := get5.Match{}
-	if err := get5.FromFile(opts.BaseSchemaPath, &wipSchema); err != nil {
+	if err := get5.OpenSchemaFile(opts.BaseSchemaPath, &wipSchema); err != nil {
 		fmt.Printf("Encountered error loading base schema file: %s\n", err)
 		os.Exit(22)
 	}
@@ -156,7 +156,7 @@ func main() {
 		wipSchema.Team2.SeriesScore = &t
 	}
 
-	if err := get5.SaveFile(wipSchema, opts.DestSchemaPath); err != nil {
+	if err := get5.SaveSchemaFile(wipSchema, opts.DestSchemaPath); err != nil {
 		fmt.Printf("Encountered error saving get5 configuration file to %q: %s", opts.DestSchemaPath, err)
 		os.Exit(43)
 	}
