@@ -35,7 +35,7 @@ var opts struct {
 
 func main() {
 	if len(GitCommitHash) > 0 {
-		fmt.Printf("get5-cli version: %s\n", GitCommitHash)
+		fmt.Printf("get5-cli version: %s\n\n", GitCommitHash)
 	}
 
 	//
