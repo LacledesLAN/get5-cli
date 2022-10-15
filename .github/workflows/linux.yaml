@@ -28,5 +28,5 @@ jobs:
       - name: Save artifact
         uses: actions/upload-artifact@v3
         with:
-          name: get5-cli
+          name: get5
           path: ./get5-cli
