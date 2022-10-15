@@ -19,7 +19,7 @@ jobs:
       - name: Test
         run: go test ./...
       - name: Build
-        run: go build -o ./get5 ./cmd/build-config/main.go -ldflags="-X main.GitCommitHash=$(git rev-parse HEAD)"
+        run: go build -ldflags="-X main.GitCommitHash=$(git rev-parse HEAD)" -o ./get5 ./cmd/build-config/main.go
       - name: Save artifact
         uses: actions/upload-artifact@v3
         with:
