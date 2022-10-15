@@ -7,20 +7,18 @@
 	"veto_first": "random",
 	"side_type": "always_knife",
 
-	"spectators": {
-		"players": []
-	},
+	"spectators": {},
 
 	"maplist":	[],
 
 	"team1": {
 		"name": "mp_team1",
-		"players": {}
+        "series_score": 0
 	},
 
 	"team2": {
 		"name": "mp_team1",
-		"players": {}
+        "series_score": 0
 	},
 
 	"cvars": {}

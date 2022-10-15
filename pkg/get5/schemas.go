@@ -5,66 +5,44 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"unicode"
 
 	"golang.org/x/exp/slices"
 )
 
-func sanitizePrintable(raw string, maxLength int) string {
-	raw = strings.Join(strings.Fields(strings.TrimSpace(raw)), "_")
-
-	raw = strings.Map(func(r rune) rune {
-		if unicode.IsGraphic(r) {
-			return r
-		}
-
-		return -1
-	}, raw)
-
-	if maxLength < 1 || maxLength >= len(raw) {
-		return raw
-	}
-
-	return raw[:maxLength]
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 // MatchTeam represents a CSGO side (CT/T).
 type MatchTeam struct {
 	// Players contains the players on the team.
-	Players json.RawMessage `json:"players"`
+	Players json.RawMessage `json:"players,omitempty"`
 	// Coaches, similarly to Players, this object maps coaches using their Steam ID and name, locking them to the coach slot unless removed using
 	// get5_removeplayer. Setting a Steam ID as coach takes precedence over being set as a player.
-	Coaches json.RawMessage `json:"coaches"`
+	Coaches json.RawMessage `json:"coaches,omitempty"`
 	// Name is the team's name. Sets mp_teamname_1 or mp_teamname_2. Printed frequently in chat. If you don't define a team name, it will be set to team_
 	// followed by the name of the captain.
 	Name string `json:"name"`
 	// Tag is a short version of the team name, used in clan tags in-game (requires that get5_set_client_clan_tags is disabled).
-	Tag string `json:"tag"`
+	Tag string `json:"tag,omitempty"`
 	// Flag is the ISO-code to use for the in-game flag of the team. Must be a supported country, i.e. FR,UK,SE etc.
-	Flag string `json:"flag"`
+	Flag string `json:"flag,omitempty"`
 	// Logo The team logo (wraps mp_teamlogo_1 or mp_teamlogo_2), which requires to be on a FastDL in order for clients to see.
-	Logo string `json:"logo"`
+	Logo string `json:"logo,omitempty"`
 	// SeriesScore is the current score in the series, this can be used to give a team a map advantage or used as a manual backup method.
-	SeriesScore int `json:"series_score"`
+	SeriesScore *int `json:"series_score,omitempty"`
 	// MatchText wraps mp_teammatchstat_1 and mp_teammatchstat_2. You probably don't want to set this, in BoX series, mp_teamscore cvars are automatically
 	// set and take the place of the mp_teammatchstat_x cvars.
-	MatchText string `json:"matchtext"`
+	MatchText string `json:"matchtext,omitempty"`
 }
 
 func sanitizeMatchTeam(mt MatchTeam) MatchTeam {
-	mt.Name = sanitizePrintable(mt.Name, 30)
-	mt.Tag = sanitizePrintable(mt.Tag, 0)
-	mt.Flag = sanitizePrintable(mt.Flag, 2)
-	mt.Logo = sanitizePrintable(mt.Logo, 0)
+	mt.Name = sanitizeAndTruncatePrintable(mt.Name, 30)
+	mt.Tag = sanitizePrintable(mt.Tag)
+	mt.Flag = sanitizeAndTruncatePrintable(mt.Flag, 2)
+	mt.Logo = sanitizePrintable(mt.Logo)
 
-	if mt.SeriesScore < 0 {
-		mt.SeriesScore = 0
+	if mt.SeriesScore != nil && *mt.SeriesScore < 0 {
+		*mt.SeriesScore = 0
 	}
 
-	mt.MatchText = sanitizePrintable(mt.MatchText, 0)
+	mt.MatchText = sanitizePrintable(mt.MatchText)
 
 	return mt
 }
@@ -114,35 +92,29 @@ type Match struct {
 	// (limited by num_maps). This should always be odd-sized if using the in-game veto system.
 	MapList []string `json:"maplist"`
 	// FavoredPercentageTeam1 is a wrapper for the server's mp_teamprediction_pct. This determines the chances of team1 winning. Default: 0
-	FavoredPercentageTeam1 *byte `json:"favored_percentage_team1"`
+	FavoredPercentageTeam1 *byte `json:"favored_percentage_team1,omitempty"`
 	// FavoredPercentageText is a wrapper for the server's mp_teamprediction_txt. Default: "".
-	FavoredPercentageText string `json:"favored_percentage_text"`
+	FavoredPercentageText string `json:"favored_percentage_text,omitempty"`
 	// Team1 starts as Counter-Terrorists (mp_team1)
-	Team1 MatchTeam `json:"team1,omitempty"`
+	Team1 MatchTeam `json:"team1"`
 	// Team2 starts as Terrorists (mp_team2)
-	Team2 MatchTeam `json:"team2,omitempty"`
+	Team2 MatchTeam `json:"team2"`
 	// Cvars contains various commands to execute on the server when loading the match configuration. This can be both regular server-commands and any Get5
 	// configuration parameter, i.e. {"hostname": "Match #3123 - Red vs. Blu"}
 	Cvars map[string]string `json:"cvars,omitempty"`
 }
 
 func sanitizeMatch(m *Match) error {
-	m.MatchTitle = sanitizePrintable(m.MatchTitle, 36)
-	m.MatchID = sanitizePrintable(m.MatchID, 0)
+	m.MatchTitle = sanitizeAndTruncatePrintable(m.MatchTitle, 36)
+	m.MatchID = sanitizePrintable(m.MatchID)
 
 	if m.NumberOfMaps != nil && (*m.NumberOfMaps < 1 || *m.NumberOfMaps%2 == 0) {
 		return errors.New("NumberOfMaps must be a positive, odd-valued integer")
 	}
 
-	m.VetoFirst = strings.ToLower(m.VetoFirst)
-	if !slices.Contains([]string{"team1", "team2", "random"}, m.VetoFirst) {
-		m.VetoFirst = ""
-	}
+	m.VetoFirst = sanitizeListItem([]string{"team1", "team2", "random"}, strings.ToLower(m.VetoFirst))
 
-	m.SideType = strings.ToLower(m.SideType)
-	if !slices.Contains([]string{"standard", "always_knife", ""}, "never_knife") {
-		m.SideType = ""
-	}
+	m.SideType = sanitizeListItem([]string{"standard", "always_knife", "never_knife"}, strings.ToLower(m.SideType))
 
 	if m.MapSides != nil {
 		if len(m.MapSides) == 0 {
@@ -168,7 +140,7 @@ func sanitizeMatch(m *Match) error {
 		}
 	}
 
-	m.FavoredPercentageText = sanitizePrintable(m.FavoredPercentageText, 0)
+	m.FavoredPercentageText = sanitizePrintable(m.FavoredPercentageText)
 
 	m.Team1 = sanitizeMatchTeam(m.Team1)
 	m.Team2 = sanitizeMatchTeam(m.Team2)

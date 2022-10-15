@@ -10,24 +10,29 @@ import (
 )
 
 var opts struct {
-	BaseSchemaPath    string   `long:"base-schema" description:"path to the base get5 configuration file to load (default: ./csgo/base-schema.json)"`
-	DestSchemaPath    string   `long:"dest-schema" description:"path to the destination schema to generate (default './csgo/automatch.json')"`
-	NumberOfMaps      byte     `long:"map-count" short:"c" description:"the number of maps to include in the series (default 3)"`
-	Maplist           []string `long:"map-list" short:"m" description:"list of maps to use for the get5 match; must be an odd number" required:"true"`
-	MatchTitle        string   `long:"match-title" description:"the name of the match"`
-	MinPlayersToReady byte     `long:"min-ready" description:"The minimum players a team needs to be able to ready up"`
-	PlayersPerTeam    byte     `long:"team-size" description:" The maximum players per team (doesn't include a coach spot)"`
-	Team1Name         string   `long:"team1-name" short:"1" description:"the name for team1" required:"true"`
-	Team1Score        byte     `long:"team1-score" description:"the team's current score in the series"`
-	Team2Name         string   `long:"team2-name" short:"2" description:"The name for team2" required:"true"`
-	Team2Score        byte     `long:"team2-score" description:"the team's current score in the series"`
+	// Required Arguments
+	Maplist   []string `long:"map-list" short:"m" description:"list of maps to use for the get5 match; must be an odd number" required:"true"`
+	Team1Name string   `long:"team1-name" short:"1" description:"the name for team1" required:"true"`
+	Team2Name string   `long:"team2-name" short:"2" description:"The name for team2" required:"true"`
+
+	// Meta Optional Arguments
+	BaseSchemaPath string `long:"base-schema" description:"path to the base get5 configuration file to load (default: ./csgo/base-schema.json)"`
+	DestSchemaPath string `long:"dest-schema" description:"path to the destination schema to generate (default './csgo/automatch.json')"`
+
+	// Optional Arguments
+	Cvars             map[string]string `long:"cvar" short:"v" description:"a CSGO cvar"`
+	MatchTitle        string            `long:"match-title" description:"Commands to execute when the match configuration is loaded (cvars and commands)"`
+	MinPlayersToReady byte              `long:"min-ready" description:"The minimum players a team needs to be able to ready up"`
+	NumberOfMaps      byte              `long:"map-count" short:"c" description:"the number of maps to include in the series (default 3)"`
+	PlayersPerTeam    byte              `long:"team-size" description:" The maximum players per team (doesn't include a coach spot)"`
+	Team1Score        byte              `long:"team1-score" description:"the team's current score in the series"`
+	Team2Score        byte              `long:"team2-score" description:"the team's current score in the series"`
 }
 
 func main() {
 	//
 	// VALIDATE COMMAND LINE ARGUMENTS
 	//
-
 	if _, err := flags.Parse(&opts); err != nil {
 		fmt.Printf("Encountered error while parsing arguments from the command line: %s\n", err)
 		os.Exit(8)
@@ -76,7 +81,6 @@ func main() {
 	//
 	// LOAD BASE SCHEMA
 	//
-
 	wipSchema := get5.Match{}
 	if err := get5.FromFile(opts.BaseSchemaPath, &wipSchema); err != nil {
 		fmt.Printf("Encountered error loading base schema file: %s\n", err)
@@ -87,16 +91,29 @@ func main() {
 	//
 	// MODIFY WIP SCHEMA
 	//
-
 	fmt.Println("\nModifying base get5 configuration")
 
-	if opts.NumberOfMaps > 0 {
-		fmt.Printf("\t• Setting number of maps to %d\n", opts.NumberOfMaps)
-		*wipSchema.NumberOfMaps = int(opts.NumberOfMaps)
-	}
-
+	// From Required Arguments
 	fmt.Printf("\t• Setting maplist to: [%s]\n", opts.Maplist)
 	wipSchema.MapList = opts.Maplist
+
+	fmt.Printf("\t• Setting team 1 name to %s\n", opts.Team1Name)
+	wipSchema.Team1.Name = opts.Team1Name
+
+	fmt.Printf("\t• Setting team 2 name to %s\n", opts.Team2Name)
+	wipSchema.Team2.Name = opts.Team2Name
+
+	// From Optional Arguments
+	if opts.Cvars != nil && len(opts.Cvars) > 1 {
+		if wipSchema.Cvars == nil {
+			wipSchema.Cvars = make(map[string]string, len(opts.Cvars))
+		}
+
+		for n, v := range opts.Cvars {
+			fmt.Printf("\t• Setting match cvar '%s' to '%s'\n", n, v)
+			wipSchema.Cvars[n] = v
+		}
+	}
 
 	opts.MatchTitle = strings.TrimSpace(opts.MatchTitle)
 	if len(opts.MatchTitle) > 0 {
@@ -109,35 +126,27 @@ func main() {
 		wipSchema.MinPlayersToReady = &opts.MinPlayersToReady
 	}
 
+	if opts.NumberOfMaps > 0 {
+		fmt.Printf("\t• Setting number of maps to %d\n", opts.NumberOfMaps)
+		*wipSchema.NumberOfMaps = int(opts.NumberOfMaps)
+	}
+
 	if opts.PlayersPerTeam > 0 {
 		fmt.Printf("\t• Setting players per team to %d\n", opts.PlayersPerTeam)
 		wipSchema.PlayersPerTeam = &opts.PlayersPerTeam
 	}
 
-	fmt.Printf("\t• Setting team 1 name to %s\n", opts.Team1Name)
-	wipSchema.Team1.Name = opts.Team1Name
-
 	if opts.Team1Score > 0 {
 		fmt.Printf("\t• Setting team 1 series score to %d\n", opts.Team1Score)
-		wipSchema.Team1.SeriesScore = int(opts.Team1Score)
+		t := int(opts.Team1Score)
+		wipSchema.Team1.SeriesScore = &t
 	}
-
-	fmt.Printf("\t• Setting team 2 name to %s\n", opts.Team2Name)
-	wipSchema.Team2.Name = opts.Team2Name
 
 	if opts.Team2Score > 0 {
 		fmt.Printf("\t• Setting team 2 series score to %d\n", opts.Team2Score)
-		wipSchema.Team2.SeriesScore = int(opts.Team2Score)
+		t := int(opts.Team2Score)
+		wipSchema.Team2.SeriesScore = &t
 	}
-
-	//
-	// VALIDATE WIP SCHEMA
-	//
-	// TODO?
-
-	//
-	// SAVE WIP SCHEMA TO DESTINATION SCHEMA
-	//
 
 	if err := get5.SaveFile(wipSchema, opts.DestSchemaPath); err != nil {
 		fmt.Printf("Encountered error saving get5 configuration file to %q: %s", opts.DestSchemaPath, err)

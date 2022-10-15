@@ -1,15 +1,18 @@
 # GET5-CLI
 
-[![Go Report
-Card](https://goreportcard.com/badge/github.com/LacledesLAN/get5-cli)](https://goreportcard.com/report/github.com/LacledesLAN/get5-cli)
+`get5-cli` is an application for modifying `get5` configuration files from the command line.
 
-`get5-cli` is an application for dynamically building `get5` configuration files from the command line.
+## Usage
 
-[Get5](https://github.com/splewis/get5) is a standalone [SourceMod](http://www.sourcemod.net/) plugin for CS:GO servers for running matches.
-It is originally based on [pugsetup](https://github.com/splewis/csgo-pug-setup) and is inspired by
-[eBot](https://github.com/deStrO/eBot-CSGO). The core idea behind get5 is the ability to define all match details in a single config file;
-the main target use-case being tournaments and leagues (online or LAN). All that is required of the server-admins is to load match config
-file to the server and the match should run without any more manual actions from the admins.
+```shell
+./get5-cli -1 "red team" -2 "blue team" -m de_dust2 -m de_inferno -m de_nuke
+```
+
+## Get List of Command Line Arguments
+
+```shell
+./get5-cli /help
+```
 
 ## How It Works
 
@@ -18,11 +21,20 @@ file to the server and the match should run without any more manual actions from
 
 ## Project Structure
 
+[![Go Report
+Card](https://goreportcard.com/badge/github.com/LacledesLAN/get5-cli)](https://goreportcard.com/report/github.com/LacledesLAN/get5-cli)
+
 * `/cmd/get5-cli` is the command line application.
 * `/pkg/get5` is the base library for the program, intended to be imported by other programs such as
 [sourceseer](https://github.com/LacledesLAN/sourceseer).
 
 ## Motivation
+
+[Get5](https://github.com/splewis/get5) is a standalone [SourceMod](http://www.sourcemod.net/) plugin for CS:GO servers for running matches.
+It is originally based on [pugsetup](https://github.com/splewis/csgo-pug-setup) and is inspired by
+[eBot](https://github.com/deStrO/eBot-CSGO). The core idea behind get5 is the ability to define all match details in a single config file;
+the main target use-case being tournaments and leagues (online or LAN). All that is required of the server-admins is to load match config
+file to the server and the match should run without any more manual actions from the admins.
 
 At [Laclede's LAN](https://github.com/LacledesLAN/) we run the majority of our game servers in [Docker](https://www.docker.com/) fo reasons
 that are explained [here](https://github.com/LacledesLAN/README.1ST/blob/master/GameServers/DockerAndGameServers.md). To be able to
