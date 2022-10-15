@@ -9,6 +9,10 @@ import (
 	"github.com/jessevdk/go-flags"
 )
 
+// GitCommitHash is used for storing the git commit hash that built this instance of `get5-cli`.
+var GitCommitHash string
+
+// opts contains the command-line arguments for `get5-cli`.
 var opts struct {
 	// Required Arguments
 	Maplist   []string `long:"map-list" short:"m" description:"list of maps to use for the get5 match; must be an odd number" required:"true"`
@@ -30,6 +34,10 @@ var opts struct {
 }
 
 func main() {
+	if len(GitCommitHash) > 0 {
+		fmt.Printf("get5-cli version: %s\n", GitCommitHash)
+	}
+
 	//
 	// VALIDATE COMMAND LINE ARGUMENTS
 	//
