@@ -111,8 +111,11 @@ func main() {
 	fmt.Printf("\t• Setting team 2 name to %s\n", opts.Team2Name)
 	wipSchema.Team2.Name = opts.Team2Name
 
+	fmt.Println(opts.Cvars)
+
 	// From Optional Arguments
-	if opts.Cvars != nil && len(opts.Cvars) > 1 {
+	if opts.Cvars != nil && len(opts.Cvars) > 0 {
+
 		if wipSchema.Cvars == nil {
 			wipSchema.Cvars = make(map[string]string, len(opts.Cvars))
 		}
