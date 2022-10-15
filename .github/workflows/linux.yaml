@@ -1,8 +1,13 @@
 name: linux/amd64
 
 on:
+  schedule:
+    - cron: '0 0 1 */2 *' # Every other month
+
   push:
     branches: [ master ]
+
+  workflow_dispatch: # Allows action to be run manually from the Actions tab
 
 jobs:
   build:
