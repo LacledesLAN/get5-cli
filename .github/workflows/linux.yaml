@@ -1,4 +1,4 @@
-name: build linux/amd64
+name: linux/amd64
 
 on:
   push:
@@ -16,12 +16,12 @@ jobs:
         with:
           go-version: 1.19
           cache: true
-#      - name: Test
-#        run: go test -v ./...
+      - name: Test
+        run: go test ./...
       - name: Build
         run: go build -o ./get5 ./cmd/build-config/main.go
       - name: Save artifact
         uses: actions/upload-artifact@v3
         with:
-          name: get5-cli
+          name: get5-cli (linux/amd64)
           path: ./get5

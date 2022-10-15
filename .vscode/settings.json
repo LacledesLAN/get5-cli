@@ -28,6 +28,7 @@
         "gocritic",
         "gocyclo",
         "golangci",
+        "gomod",
         "gosec",
         "interfacer",
         "jessevdk",
