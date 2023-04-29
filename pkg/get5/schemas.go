@@ -12,7 +12,7 @@ import (
 // MatchTeam represents a CSGO side (CT/T).
 type MatchTeam struct {
 	// Players contains the players on the team.
-	Players json.RawMessage `json:"players,omitempty"`
+	Players json.RawMessage `json:"players"`
 	// Coaches, similarly to Players, this object maps coaches using their Steam ID and name, locking them to the coach slot unless removed using
 	// get5_removeplayer. Setting a Steam ID as coach takes precedence over being set as a player.
 	Coaches json.RawMessage `json:"coaches,omitempty"`
