@@ -1,15 +1,24 @@
 {
-	"num_maps": 3,
+	"num_maps": 1,
 	"players_per_team": 5,
 	"min_players_to_ready": 5,
 	"min_spectators_to_ready": 0,
-	"skip_veto": false,
+	"skip_veto": true,
 	"veto_first": "random",
 	"side_type": "always_knife",
+	"map_sides":[],
 
 	"spectators": {},
 
-	"maplist":	[],
+	"maplist":[
+		    "de_ancient",
+    		"de_anubis",
+    		"de_inferno",
+    		"de_mirage",
+    		"de_nuke",
+    		"de_overpass",
+    		"de_vertigo"
+	],
 
 	"team1": {
 		"name": "mp_team1",
@@ -17,9 +26,11 @@
 	},
 
 	"team2": {
-		"name": "mp_team1",
+		"name": "mp_team2",
         "series_score": 0
 	},
 
-	"cvars": {}
+	"cvars": {
+
+    }
 }
