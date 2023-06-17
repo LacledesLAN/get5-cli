@@ -15,9 +15,9 @@ var GitCommitHash string
 // opts contains the command-line arguments for `get5-cli`.
 var opts struct {
 	// Required Arguments
-	Maplist   []string `long:"map-list" short:"m" description:"list of maps to use for the get5 match; must be an odd number" required:"true"`
-	Team1Name string   `long:"team1-name" short:"1" description:"the name for team1" required:"true"`
-	Team2Name string   `long:"team2-name" short:"2" description:"The name for team2" required:"true"`
+	//	Maplist   []string `long:"map-list" short:"m" description:"list of maps to use for the get5 match; must be an odd number" required:"true"`
+	Team1Name string `long:"team1-name" short:"1" description:"the name for team1" required:"true"`
+	Team2Name string `long:"team2-name" short:"2" description:"The name for team2" required:"true"`
 
 	// Meta Optional Arguments
 	BaseSchemaPath string `long:"base-schema" description:"path to the base get5 configuration file to load (default: ./csgo/base-schema.json)"`
@@ -27,7 +27,7 @@ var opts struct {
 	Cvars             map[string]string `long:"cvar" short:"v" description:"a CSGO cvar"`
 	MatchTitle        string            `long:"match-title" description:"Commands to execute when the match configuration is loaded (cvars and commands)"`
 	MinPlayersToReady byte              `long:"min-ready" description:"The minimum players a team needs to be able to ready up"`
-	NumberOfMaps      byte              `long:"map-count" short:"c" description:"the number of maps to include in the series (default 3)"`
+	NumberOfMaps      byte              `long:"map-count" short:"n" description:"the number of maps to include in the series (default 3)"`
 	PlayersPerTeam    byte              `long:"team-size" description:" The maximum players per team (doesn't include a coach spot)"`
 	Team1Score        byte              `long:"team1-score" description:"the team's current score in the series"`
 	Team2Score        byte              `long:"team2-score" description:"the team's current score in the series"`
@@ -48,12 +48,12 @@ func main() {
 
 	opts.BaseSchemaPath = strings.TrimSpace(opts.BaseSchemaPath)
 	if len(opts.BaseSchemaPath) == 0 {
-		opts.BaseSchemaPath = "./csgo/base-schema.json"
+		opts.BaseSchemaPath = "serverfiles/steamapps/common/Counter-Strike Global Offensive Beta - Dedicated Server/csgo/base-schema.json"
 	}
 
 	opts.DestSchemaPath = strings.TrimSpace(opts.DestSchemaPath)
 	if len(opts.DestSchemaPath) == 0 {
-		opts.DestSchemaPath = "./csgo/automatch.json"
+		opts.DestSchemaPath = "serverfiles/steamapps/common/Counter-Strike Global Offensive Beta - Dedicated Server/csgo/automatch.json"
 	}
 
 	if opts.NumberOfMaps > 0 && opts.NumberOfMaps%2 == 0 {
@@ -61,18 +61,18 @@ func main() {
 		os.Exit(1)
 	}
 
-	if opts.Maplist == nil || len(opts.Maplist) < 1 {
-		fmt.Printf("A list of maps must be provided")
-		os.Exit(1)
-	} else if opts.NumberOfMaps > 0 && len(opts.Maplist) < int(opts.NumberOfMaps) {
-		fmt.Printf("List of maps must contain as least %d maps in it", opts.NumberOfMaps)
-		os.Exit(1)
-	}
+	//	if opts.Maplist == nil || len(opts.Maplist) < 1 {
+	//		fmt.Printf("A list of maps must be provided")
+	//		os.Exit(1)
+	//	} else if opts.NumberOfMaps > 0 && len(opts.Maplist) < int(opts.NumberOfMaps) {
+	//		fmt.Printf("List of maps must contain as least %d maps in it", opts.NumberOfMaps)
+	//		os.Exit(1)
+	//	}
 
-	if len(opts.Maplist)%2 == 0 {
-		fmt.Printf("Must provide a positive, odd number of maps; got: %v\n", opts.Maplist)
-		os.Exit(61)
-	}
+	//	if len(opts.Maplist)%2 == 0 {
+	//		fmt.Printf("Must provide a positive, odd number of maps; got: %v\n", opts.Maplist)
+	//		os.Exit(61)
+	//	}
 
 	opts.Team1Name = strings.TrimSpace(opts.Team1Name)
 	if len(opts.Team1Name) < 1 {
@@ -102,8 +102,8 @@ func main() {
 	fmt.Println("\nModifying base get5 configuration")
 
 	// From Required Arguments
-	fmt.Printf("\t• Setting maplist to: [%s]\n", opts.Maplist)
-	wipSchema.MapList = opts.Maplist
+	//	fmt.Printf("\t• Setting maplist to: [%s]\n", opts.Maplist)
+	//	wipSchema.MapList = opts.Maplist
 
 	fmt.Printf("\t• Setting team 1 name to %s\n", opts.Team1Name)
 	wipSchema.Team1.Name = opts.Team1Name
